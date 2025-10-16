@@ -210,19 +210,19 @@ export function StrategyOrderDetailsPage({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={onBack}>
+        <div className="flex items-center gap-4 min-w-0 flex-1">
+          <Button variant="ghost" size="icon" onClick={onBack} className="flex-shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h2 className="dark:text-white">Detalhes do Pedido</h2>
-              <Badge className={statusInfo.color}>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <h2 className="dark:text-white text-lg sm:text-xl truncate">Detalhes do Pedido</h2>
+              <Badge className={`${statusInfo.color} flex-shrink-0`}>
                 {React.createElement(statusInfo.icon, { className: "w-3 h-3 mr-1" })}
                 {statusInfo.label}
               </Badge>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">ID: {order.id}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">ID: {order.id}</p>
           </div>
         </div>
 
@@ -231,6 +231,7 @@ export function StrategyOrderDetailsPage({
           <Button 
             onClick={() => setApprovalDialogOpen(true)}
             style={{ backgroundColor: '#465EFF' }}
+            className="flex-shrink-0 w-full sm:w-auto"
           >
             Analisar Pedido
           </Button>
@@ -258,7 +259,7 @@ export function StrategyOrderDetailsPage({
               />
               
               {/* Stages */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 relative">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 relative">
                 {processStages.map((stage) => {
                   const Icon = stage.icon;
                   const isCompleted = stage.status === 'completed';
@@ -275,7 +276,7 @@ export function StrategyOrderDetailsPage({
                       >
                         <Icon className="w-5 h-5" />
                       </div>
-                      <span className={`text-xs ${isCompleted ? 'dark:text-white' : 'text-gray-400'}`}>
+                      <span className={`text-xs text-center ${isCompleted ? 'dark:text-white' : 'text-gray-400'}`}>
                         {stage.label}
                       </span>
                     </div>
@@ -306,33 +307,37 @@ export function StrategyOrderDetailsPage({
       )}
 
       <Tabs defaultValue="details" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 lg:w-[600px]">
-          <TabsTrigger value="details">
-            <FileText className="w-4 h-4 mr-2" />
-            Detalhes
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:w-[600px]">
+          <TabsTrigger value="details" className="text-xs sm:text-sm">
+            <FileText className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Detalhes</span>
+            <span className="sm:hidden">Info</span>
           </TabsTrigger>
-          <TabsTrigger value="purchase">
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            Processo de Compra
+          <TabsTrigger value="purchase" className="text-xs sm:text-sm">
+            <ShoppingCart className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Processo de Compra</span>
+            <span className="sm:hidden">Compra</span>
           </TabsTrigger>
-          <TabsTrigger value="comments">
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Comentários
+          <TabsTrigger value="comments" className="text-xs sm:text-sm">
+            <MessageSquare className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Comentários</span>
+            <span className="sm:hidden">Chat</span>
           </TabsTrigger>
-          <TabsTrigger value="history">
-            <HistoryIcon className="w-4 h-4 mr-2" />
-            Histórico
+          <TabsTrigger value="history" className="text-xs sm:text-sm">
+            <HistoryIcon className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Histórico</span>
+            <span className="sm:hidden">Log</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Tab: Details */}
         <TabsContent value="details" className="space-y-6 mt-6">
           {/* Main Info Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {/* Item Information */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <Package className="w-5 h-5" />
                   Informações do Item
                 </CardTitle>
@@ -340,24 +345,24 @@ export function StrategyOrderDetailsPage({
               <CardContent className="space-y-4">
                 <div>
                   <Label className="text-gray-500 dark:text-gray-400 text-sm">Nome do Item</Label>
-                  <p className="text-base mt-1 dark:text-gray-200">{order.item}</p>
+                  <p className="text-sm sm:text-base mt-1 dark:text-gray-200 break-words">{order.item}</p>
                 </div>
                 <Separator />
                 <div>
                   <Label className="text-gray-500 dark:text-gray-400 text-sm">SKU</Label>
-                  <p className="text-base mt-1 font-mono dark:text-gray-200">{order.sku}</p>
+                  <p className="text-sm sm:text-base mt-1 font-mono dark:text-gray-200 break-all">{order.sku}</p>
                 </div>
                 <Separator />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-gray-500 dark:text-gray-400 text-sm">Quantidade</Label>
-                    <p className="text-base mt-1 dark:text-gray-200">
+                    <p className="text-sm sm:text-base mt-1 dark:text-gray-200">
                       {order.quantity.toLocaleString('pt-BR')} un
                     </p>
                   </div>
                   <div>
                     <Label className="text-gray-500 dark:text-gray-400 text-sm">Categoria</Label>
-                    <p className="text-base mt-1 dark:text-gray-200">{order.category || 'Não definida'}</p>
+                    <p className="text-sm sm:text-base mt-1 dark:text-gray-200 break-words">{order.category || 'Não definida'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -366,7 +371,7 @@ export function StrategyOrderDetailsPage({
             {/* Financial Information */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <DollarSign className="w-5 h-5" />
                   Informações Financeiras
                 </CardTitle>
@@ -374,7 +379,7 @@ export function StrategyOrderDetailsPage({
               <CardContent className="space-y-4">
                 <div>
                   <Label className="text-gray-500 dark:text-gray-400 text-sm">Valor Unitário Estimado</Label>
-                  <p className="text-base mt-1 dark:text-gray-200">
+                  <p className="text-sm sm:text-base mt-1 dark:text-gray-200">
                     {new Intl.NumberFormat('pt-BR', {
                       style: 'currency',
                       currency: 'BRL'
@@ -384,7 +389,7 @@ export function StrategyOrderDetailsPage({
                 <Separator />
                 <div>
                   <Label className="text-gray-500 dark:text-gray-400 text-sm">Valor Total Estimado</Label>
-                  <p className="text-2xl mt-1 dark:text-white">
+                  <p className="text-xl sm:text-2xl mt-1 dark:text-white break-words">
                     {new Intl.NumberFormat('pt-BR', {
                       style: 'currency',
                       currency: 'BRL'
@@ -394,7 +399,7 @@ export function StrategyOrderDetailsPage({
                 <Separator />
                 <div>
                   <Label className="text-gray-500 dark:text-gray-400 text-sm">Centro de Custo</Label>
-                  <p className="text-base mt-1 dark:text-gray-200">{order.costCenter}</p>
+                  <p className="text-sm sm:text-base mt-1 dark:text-gray-200 break-words">{order.costCenter}</p>
                 </div>
               </CardContent>
             </Card>
@@ -415,10 +420,10 @@ export function StrategyOrderDetailsPage({
                     <Badge 
                       key={index}
                       variant="outline"
-                      className="px-3 py-1"
+                      className="px-2 sm:px-3 py-1 text-xs sm:text-sm"
                     >
-                      <Building2 className="w-3 h-3 mr-1" />
-                      {supplier}
+                      <Building2 className="w-3 h-3 mr-1 flex-shrink-0" />
+                      <span className="truncate max-w-[150px] sm:max-w-none">{supplier}</span>
                     </Badge>
                   ))}
                 </div>
@@ -437,7 +442,7 @@ export function StrategyOrderDetailsPage({
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-base dark:text-gray-200">
+                  <p className="text-sm sm:text-base dark:text-gray-200">
                     {new Date(order.deadline).toLocaleDateString('pt-BR', {
                       day: '2-digit',
                       month: 'long',
@@ -456,7 +461,7 @@ export function StrategyOrderDetailsPage({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-base dark:text-gray-200">{order.source}</p>
+                <p className="text-sm sm:text-base dark:text-gray-200 break-words">{order.source}</p>
               </CardContent>
             </Card>
           </div>
@@ -488,26 +493,29 @@ export function StrategyOrderDetailsPage({
                   {order.status !== 'delivered' && (role === 'gestor' || role === 'admin') && (
                     <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-3">
                       <h4 className="text-sm dark:text-gray-200">Adicionar Nova Cotação</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         <Input
                           placeholder="Nome do fornecedor"
                           value={quotationSupplier}
                           onChange={(e) => setQuotationSupplier(e.target.value)}
+                          className="w-full"
                         />
                         <Input
                           type="number"
                           placeholder="Valor total"
                           value={quotationPrice}
                           onChange={(e) => setQuotationPrice(e.target.value)}
+                          className="w-full"
                         />
                         <Input
                           type="number"
                           placeholder="Prazo (dias)"
                           value={quotationDelivery}
                           onChange={(e) => setQuotationDelivery(e.target.value)}
+                          className="w-full"
                         />
                       </div>
-                      <Button onClick={handleAddQuotation} size="sm">
+                      <Button onClick={handleAddQuotation} size="sm" className="w-full sm:w-auto">
                         <Plus className="w-4 h-4 mr-2" />
                         Adicionar Cotação
                       </Button>

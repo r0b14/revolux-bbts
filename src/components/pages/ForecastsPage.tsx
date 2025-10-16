@@ -292,10 +292,10 @@ export function ForecastsPage({ orders }: ForecastsPageProps) {
                     yAxisId="right"
                     type="monotone" 
                     dataKey="valor" 
-                    stroke="#FCFC30" 
+                    stroke="#FF8C00" 
                     strokeWidth={3}
                     name="Valor Total (R$)"
-                    dot={{ fill: '#FCFC30', r: 5 }}
+                    dot={{ fill: '#FF8C00', r: 5 }}
                   />
                 </LineChart>
               </ResponsiveContainer>

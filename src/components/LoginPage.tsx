@@ -7,9 +7,10 @@ import { Lock, Bot } from 'lucide-react';
 
 interface LoginPageProps {
   onLogin: (email: string, password: string) => void;
+  onSwitchToRegister?: () => void;
 }
 
-export function LoginPage({ onLogin }: LoginPageProps) {
+export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -72,7 +73,16 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
           </div>
         </CardContent>
-          {/* Registration link removed from login screen in production build */}
+        <div className="px-6 pb-6 text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Ainda não tem conta?</p>
+          <button
+            onClick={() => onSwitchToRegister?.()}
+            className="mt-2 text-sm font-medium hover:underline"
+            style={{ color: '#465EFF' }}
+          >
+            Criar conta
+          </button>
+        </div>
       </Card>
     </div>
   );

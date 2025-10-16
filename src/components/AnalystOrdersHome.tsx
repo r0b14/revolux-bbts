@@ -16,7 +16,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface AnalystOrdersHomeProps {
   orders: Order[];
@@ -232,7 +232,6 @@ export function AnalystOrdersHome({
             <HomePage 
               orders={orders}
               onOrderClick={handleOrderClick}
-              onNavigateToOrders={() => setCurrentPage('orders')}
             />
           )}
           {currentPage === 'orders' && (

@@ -6,16 +6,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Package, Lock } from 'lucide-react';
 
 interface LoginPageProps {
-  onLogin: (email: string, password: string) => void;
+  onLogin: (email: string, password: string) => Promise<void> | void;
 }
 
 export function LoginPage({ onLogin }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [err, setErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(email, password);
+    setErr(null);
+    setLoading(true);
+    try {
+      await onLogin(email, password);
+    } catch (error: any) {
+      const code = error?.code ? `${error.code} — ` : '';
+      setErr(code + (error?.message || 'Erro ao autenticar'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,11 +69,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={loading}>
               <Lock className="w-4 h-4 mr-2" />
-              Entrar no sistema
+              {loading ? 'Entrando...' : 'Entrar no sistema'}
             </Button>
           </form>
+          {err && <div className="mt-3 text-sm text-red-600">{err}</div>}
           
           <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-900 mb-2">Usuários de demonstração:</p>

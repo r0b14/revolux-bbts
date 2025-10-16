@@ -1,6 +1,7 @@
 import { useState } from 'react';
+
 import { Order } from '../../types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Button } from '../ui/button';
 import { Bell, AlertCircle, Clock, TrendingUp, Lightbulb } from 'lucide-react';
@@ -10,10 +11,9 @@ import { AITaskAgent } from '../AITaskAgent';
 interface HomePageProps {
   orders: Order[];
   onOrderClick: (order: Order) => void;
-  onNavigateToOrders: () => void;
 }
 
-export function HomePage({ orders, onOrderClick, onNavigateToOrders }: HomePageProps) {
+export function HomePage({ orders, onOrderClick }: HomePageProps) {
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   
   const pendingOrders = orders.filter(o => o.status === 'pending');

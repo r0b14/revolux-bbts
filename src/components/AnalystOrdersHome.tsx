@@ -107,7 +107,7 @@ export function AnalystOrdersHome({
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex transition-colors">
+    <div className="h-screen bg-gray-50 dark:bg-gray-950 flex transition-colors overflow-hidden">
       {/* Sidebar */}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-50
@@ -115,6 +115,7 @@ export function AnalystOrdersHome({
         transform transition-all duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         ${sidebarCollapsed ? 'w-20' : 'w-64'}
+        h-full
       `}>
         <div className="h-full flex flex-col">
           {/* Logo */}
@@ -247,7 +248,7 @@ export function AnalystOrdersHome({
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0" style={{ maxHeight: '768px' }}>
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Page Content */}
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 overflow-auto">
           {/* If children provided (Router outlet) render it, otherwise fall back to internal navigation for older flows */}

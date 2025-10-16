@@ -7,9 +7,11 @@ import { Package, Lock } from 'lucide-react';
 
 interface LoginPageProps {
   onLogin: (email: string, password: string) => Promise<void> | void;
+  onSwitchToRegister?: () => void;
+  infoMessage?: string | null;
 }
 
-export function LoginPage({ onLogin }: LoginPageProps) {
+export function LoginPage({ onLogin, onSwitchToRegister, infoMessage }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState<string | null>(null);
@@ -75,6 +77,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </Button>
           </form>
           {err && <div className="mt-3 text-sm text-red-600">{err}</div>}
+          {infoMessage && <div className="mt-3 text-sm text-green-700">{infoMessage}</div>}
           
           <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-900 mb-2">Usuários de demonstração:</p>
@@ -84,6 +87,17 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
           </div>
         </CardContent>
+          <div className="px-6 pb-6 text-center">
+            <span className="text-sm text-slate-600 mr-2">Ainda não tem conta?</span>
+            <button
+              type="button"
+              className="text-sky-600 underline text-sm hover:text-sky-800 hover:underline-offset-2 transition-transform transform hover:scale-105 cursor-pointer"
+              onClick={() => onSwitchToRegister?.()}
+              aria-label="Cadastre-se"
+            >
+              Cadastre-se
+            </button>
+          </div>
       </Card>
     </div>
   );

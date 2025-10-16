@@ -1,102 +1,84 @@
-import { Protected } from "../../components/Protected";
-import Navbar from "../../components/Navbar";
-import FileDrop from "../../components/FileDrop";
-import CsvTable from "../../components/CsvTable";
-import { useState } from "react";
-import type { Role } from "../services/roles";
-import { createUploadMeta, finalizeUpload, failUpload } from "../services/firestoreUploads";
-import { analyzeOnAzure } from "../services/azure";
-import type { Metrics } from "../services/types";
+// Em src/app/routes/UploadCsv.tsx
 
-export default function UploadCsv() {
-  const [file, setFile] = useState<File | null>(null);
-  const [uploadId, setUploadId] = useState<string | null>(null);
-  const [processing, setProcessing] = useState(false);
-  const [metrics, setMetrics] = useState<Metrics | null>(null);
-  const [error, setError] = useState<string | null>(null);
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useAuth } from '@/app/context/AuthContext'; // Para pegar o ID do usuário
 
-  async function handleSelect(f: File) {
-    setFile(f);
-    setMetrics(null);
-    setError(null);
-    // cria o doc em Firestore com status=pending
-    try {
-      const id = await createUploadMeta(f);
-      setUploadId(id);
-    } catch (e: any) {
-      setError(e.message || "Erro ao criar metadados do upload");
+export function UploadCsv() {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const { user } = useAuth();
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setSelectedFile(event.target.files[0]);
     }
-  }
+  };
 
-  async function handleProcess() {
-    if (!file || !uploadId) return;
-    setProcessing(true);
-    setError(null);
+  const handleUpload = async () => {
+    if (!selectedFile || !user) {
+      setStatusMessage('Por favor, selecione um arquivo e esteja logado.');
+      return;
+    }
+
+    setIsUploading(true);
+    setStatusMessage('Iniciando upload...');
+
     try {
-      const m = await analyzeOnAzure(file); // chama a Azure Function
-      setMetrics(m);
-      await finalizeUpload(uploadId, m);    // grava métricas no Firestore
-    } catch (e: any) {
-      const msg = e.message || "Falha ao processar CSV";
-      setError(msg);
-      if (uploadId) await failUpload(uploadId, msg);
+      // 1. Pedir a URL de upload para a nossa Azure Function
+      setStatusMessage('Solicitando URL de upload segura...');
+      
+      // Constrói um caminho único para o arquivo do usuário
+      const filePath = `csvs/${user.uid}/${Date.now()}-${selectedFile.name}`;
+      
+      const funcUrl = `https://${process.env.VITE_FUNC_APP_NAME}.azurewebsites.net/api/get-upload-url?path=${filePath}`;
+      
+      const response = await fetch(funcUrl);
+
+      if (!response.ok) {
+        throw new Error('Falha ao obter a URL de upload.');
+      }
+
+      const uploadUrl = await response.text();
+      setStatusMessage('URL recebida. Enviando arquivo...');
+
+      // 2. Enviar o arquivo CSV diretamente para o Azure Blob Storage usando a URL recebida
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'x-ms-blob-type': 'BlockBlob', // Header necessário para o Azure Blob Storage
+          'Content-Type': selectedFile.type,
+        },
+        body: selectedFile,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Falha ao enviar o arquivo para o Azure Storage.');
+      }
+
+      setStatusMessage('Upload concluído com sucesso! O arquivo será processado em breve.');
+      
+      // Aqui você pode, por exemplo, registrar no Firestore que um novo arquivo foi enviado.
+      // Isso será útil para o dashboard saber que há novos dados para buscar.
+
+    } catch (error) {
+      console.error(error);
+      setStatusMessage(`Erro durante o upload: ${error.message}`);
     } finally {
-      setProcessing(false);
+      setIsUploading(false);
     }
-  }
+  };
 
   return (
-    <Protected allow={["admin","gestor"] as Role[]}>
-      <Navbar />
-      <main className="mx-auto max-w-6xl p-4 space-y-6">
-        <header className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">Upload de CSV</h1>
-          <div className="text-sm text-slate-500">
-            {uploadId ? <>Upload ID: <span className="font-mono">{uploadId}</span></> : null}
-          </div>
-        </header>
-
-        <FileDrop onFile={handleSelect} />
-
-        {file && (
-          <section className="space-y-4">
-            <div className="flex items-center gap-3">
-              <button
-                className="px-4 py-2 rounded bg-slate-900 text-white disabled:opacity-50"
-                onClick={handleProcess}
-                disabled={processing}
-              >
-                {processing ? "Processando na Azure…" : "Processar no servidor (Azure)"}
-              </button>
-              <span className="text-sm text-slate-600">{file.name} • {(file.size/1024).toFixed(0)} KB</span>
-            </div>
-
-            <div className="space-y-3">
-              <h2 className="text-lg font-medium">Preview</h2>
-              <CsvTable file={file} />
-            </div>
-
-            {metrics && (
-              <div className="border rounded-xl bg-white p-4">
-                <h3 className="font-semibold mb-2">Métricas</h3>
-                <ul className="text-sm grid grid-cols-2 gap-2">
-                  <li><b>Linhas:</b> {metrics.rows}</li>
-                  <li><b>Colunas:</b> {metrics.columns}</li>
-                  <li className="col-span-2">
-                    <b>% faltantes:</b> {(metrics.missingRatio * 100).toFixed(2)}%
-                  </li>
-                </ul>
-              </div>
-            )}
-
-            {error && (
-              <div className="text-sm text-red-600">
-                {error}
-              </div>
-            )}
-          </section>
-        )}
-      </main>
-    </Protected>
+    <div>
+      <h2>Upload de Arquivo CSV</h2>
+      <Input type="file" accept=".csv" onChange={handleFileChange} />
+      <Button onClick={handleUpload} disabled={isUploading || !selectedFile}>
+        {isUploading ? 'Enviando...' : 'Enviar para Análise'}
+      </Button>
+      {statusMessage && <p>{statusMessage}</p>}
+    </div>
   );
 }

@@ -16,7 +16,7 @@ export function LoginWrapper() {
     }
   }
 
-  return <LoginPage onLogin={handleLogin} />;
+  return <LoginPage onLogin={handleLogin} onSwitchToRegister={() => navigate('/register')} />;
 }
 
 export function RegisterWrapper() {

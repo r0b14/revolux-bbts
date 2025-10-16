@@ -1,5 +1,6 @@
 import { OrderListingPage } from './OrderListingPage';
 import { OrderDetailsPage } from './OrderDetailsPage';
+import { HomePage } from './HomePage';
 import { useOrders } from '../../app/context/OrdersContext';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -12,6 +13,17 @@ export function OrdersListWrapper() {
   }
 
   return <OrderListingPage orders={orders} onOrderClick={handleOrderClick} />;
+}
+
+export function HomeWrapper() {
+  const { orders } = useOrders();
+  const navigate = useNavigate();
+
+  function handleOrderClick(order: any) {
+    navigate(`/orders/${order.id}`);
+  }
+
+  return <HomePage orders={orders} onOrderClick={handleOrderClick} />;
 }
 
 export function OrderDetailsWrapper() {

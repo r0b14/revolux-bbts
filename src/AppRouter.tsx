@@ -9,6 +9,7 @@ import { StrategyAnalystHome } from './components/StrategyAnalystHome';
 import { ForecastsPage } from './components/pages/ForecastsPage';
 import { useAuth } from './app/context/AuthContext';
 import { LoginWrapper, RegisterWrapper } from './components/AuthRouteWrappers';
+import { useNavigate } from 'react-router-dom';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth() as any;
@@ -27,16 +28,27 @@ function RequireRole({ children, allowedRoles }: { children: React.ReactNode; al
   return <>{children}</>;
 }
 
+function StrategyWrapper() {
+  const { user, logout } = useAuth() as any;
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout?.();
+    navigate('/login');
+  }
+
+  return <StrategyAnalystHome onLogout={handleLogout} userEmail={user?.email ?? ''} />;
+}
+
 export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
   <Route path="/login" element={<LoginWrapper />} />
   <Route path="/register" element={<RegisterWrapper />} />
 
         <Route
-          path="/dashboard"
+          path="/"
           element={
             <RequireAuth>
               <OrdersProvider>
@@ -44,48 +56,21 @@ export function AppRouter() {
               </OrdersProvider>
             </RequireAuth>
           }
-        />
+        >
+          <Route index element={<div />} />
+          <Route path="dashboard" element={<OrdersListWrapper />} />
+          <Route path="orders" element={<OrdersListWrapper />} />
+          <Route path="orders/:id" element={<OrderDetailsWrapper />} />
+          <Route path="forecasts" element={<ForecastsPage orders={[]} />} />
+        </Route>
 
         <Route
           path="/strategy"
           element={
             <RequireAuth>
               <RequireRole allowedRoles={["admin", "gestor"]}>
-                <StrategyAnalystHome onLogout={() => {}} userEmail={""} />
+                <StrategyWrapper />
               </RequireRole>
-            </RequireAuth>
-          }
-        />
-
-        <Route
-          path="/orders"
-          element={
-            <RequireAuth>
-              <OrdersProvider>
-                <OrdersListWrapper />
-              </OrdersProvider>
-            </RequireAuth>
-          }
-        />
-
-        <Route
-          path="/orders/:id"
-          element={
-            <RequireAuth>
-              <OrdersProvider>
-                <OrderDetailsWrapper />
-              </OrdersProvider>
-            </RequireAuth>
-          }
-        />
-
-        <Route
-          path="/forecasts"
-          element={
-            <RequireAuth>
-              <OrdersProvider>
-                <ForecastsPage orders={[]} />
-              </OrdersProvider>
             </RequireAuth>
           }
         />

@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { Order } from '../types';
 import { Button } from './ui/button';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-import { HomePage } from './pages/HomePage';
-import { OrderListingPage } from './pages/OrderListingPage';
-import { ForecastsPage } from './pages/ForecastsPage';
-import { OrderDetailsPage } from './pages/OrderDetailsPage';
+// page contents will render via nested routes (Outlet)
 import { FloatingChat } from './FloatingChat';
 import { 
   LogOut, 
@@ -16,80 +14,40 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { toast } from 'sonner';
+// toast intentionally unused here; child pages will show toasts
 
-interface AnalystOrdersHomeProps {
-  orders: Order[];
-  onUpdateOrder: (orderId: string, updates: Partial<Order>) => void;
-  onLogout: () => void;
-  userEmail: string;
-}
-
-type PageType = 'home' | 'orders' | 'forecasts' | 'order-details';
-
-export function AnalystOrdersHome({ 
-  orders, 
-  onUpdateOrder, 
+export function AnalystOrdersHome({
+  orders,
   onLogout,
-  userEmail 
-}: AnalystOrdersHomeProps) {
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [currentPage, setCurrentPage] = useState<PageType>('home');
+  userEmail,
+  children
+}: {
+  // keep props for backward compatibility but primary navigation will use routes
+  orders?: Order[];
+  onLogout?: () => void;
+  userEmail?: string;
+  children?: React.ReactNode;
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const handleOrderClick = (order: Order) => {
-    setSelectedOrder(order);
-    setCurrentPage('order-details');
-  };
-
-  const handleApprove = (orderId: string) => {
-    onUpdateOrder(orderId, { status: 'approved' });
-    toast.success('Pedido aprovado com sucesso!', {
-      description: `O pedido ${orderId} foi aprovado e registrado no histórico.`
-    });
-    setCurrentPage('orders');
-  };
-
-  const handleEdit = (orderId: string, updates: Partial<Order>) => {
-    const currentOrder = orders.find(o => o.id === orderId);
-    const shouldChangeStatus = currentOrder?.status === 'pending' && 
-      (updates.quantity !== undefined || updates.estimatedValue !== undefined);
-    
-    onUpdateOrder(orderId, { 
-      ...updates, 
-      ...(shouldChangeStatus ? { status: 'edited' } : {})
-    });
-    
-    toast.success('Pedido atualizado com sucesso!', {
-      description: `As alterações do pedido ${orderId} foram salvas.`
-    });
-  };
-
-  const handleDefer = (orderId: string, justification: string, reminderDays?: number) => {
-    const reminderDate = new Date();
-    if (reminderDays) {
-      reminderDate.setDate(reminderDate.getDate() + reminderDays);
-    }
-    
-    onUpdateOrder(orderId, { 
-      status: 'deferred',
-      reminderDate: reminderDays ? reminderDate.toISOString() : undefined
-    });
-    
-    toast.success('Pedido adiado', {
-      description: `${justification}${reminderDays ? ` - Lembrete em ${reminderDays} dia(s)` : ''}`
-    });
-    setCurrentPage('orders');
-  };
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const menuItems = [
-    { id: 'home' as PageType, label: 'Home', icon: Home },
-    { id: 'orders' as PageType, label: 'Listagem de Pedidos', icon: List },
-    { id: 'forecasts' as PageType, label: 'Previsões', icon: TrendingUp },
+    { id: 'home', label: 'Home', icon: Home, path: '/dashboard' },
+    { id: 'orders', label: 'Listagem de Pedidos', icon: List, path: '/orders' },
+    { id: 'forecasts', label: 'Previsões', icon: TrendingUp, path: '/forecasts' },
   ];
 
-  const pendingCount = orders.filter(o => o.status === 'pending').length;
+  const currentOrders = orders ?? [];
+  const pendingCount = currentOrders.filter(o => o.status === 'pending').length;
+
+  const pathname = location.pathname;
+  // const isOrderDetails = pathname.startsWith('/orders/') && !!params.id;
+  const isOrders = pathname === '/orders';
+  const isForecasts = pathname === '/forecasts';
+  const isHome = pathname === '/dashboard' || pathname === '/';
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -122,13 +80,13 @@ export function AnalystOrdersHome({
               </div>
               {!sidebarCollapsed && (
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="lg:hidden"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <X className="w-5 h-5" />
-                </Button>
+                    variant="ghost"
+                    size="icon"
+                    className="lg:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
               )}
             </div>
           </div>
@@ -136,15 +94,17 @@ export function AnalystOrdersHome({
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1">
             {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = currentPage === item.id;
-              const showBadge = item.id === 'home' && pendingCount > 0;
+              const Icon = item.icon as any;
+              const isActive = (item.path === '/dashboard' && isHome) ||
+                (item.path === '/orders' && isOrders) ||
+                (item.path === '/forecasts' && isForecasts);
+              const showBadge = item.path === '/dashboard' && pendingCount > 0;
 
               return (
                 <button
                   key={item.id}
                   onClick={() => {
-                    setCurrentPage(item.id);
+                    navigate(item.path);
                     setSidebarOpen(false);
                   }}
                   className={`
@@ -226,39 +186,14 @@ export function AnalystOrdersHome({
           </div>
         </header>
 
-        {/* Page Content */}
+        {/* Page Content - children rendered here (Outlet from parent) */}
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 overflow-auto">
-          {currentPage === 'home' && (
-            <HomePage 
-              orders={orders}
-              onOrderClick={handleOrderClick}
-            />
-          )}
-          {currentPage === 'orders' && (
-            <OrderListingPage 
-              orders={orders}
-              onOrderClick={handleOrderClick}
-            />
-          )}
-          {currentPage === 'forecasts' && (
-            <ForecastsPage 
-              orders={orders}
-            />
-          )}
-          {currentPage === 'order-details' && selectedOrder && (
-            <OrderDetailsPage
-              order={selectedOrder}
-              onBack={() => setCurrentPage('orders')}
-              onApprove={handleApprove}
-              onEdit={handleEdit}
-              onDefer={handleDefer}
-            />
-          )}
+          {children ?? <div />}
         </main>
       </div>
 
       {/* Floating Chat - Available on all pages */}
-      <FloatingChat orders={orders} userName={userEmail} />
+      <FloatingChat orders={orders ?? []} userName={userEmail ?? ''} />
     </div>
   );
 }

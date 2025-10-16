@@ -8,7 +8,7 @@ type AuthState = {
   user: User | null;
   role: Role | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<Role | null>;
   logout: () => Promise<void>;
 };
 
@@ -24,8 +24,11 @@ async function ensureUserDoc(user: User) {
       name: user.displayName || "Usuário",
       role: "operador", // role padrão; admin pode alterar depois
       createdAt: serverTimestamp(),
+      ownerUid: user.uid,
     });
+    return { role: 'operador' } as any;
   }
+  return snap.data();
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -34,9 +37,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    waitForAuthInit().then((u) => {
+    waitForAuthInit().then(async (u) => {
+      // Force fresh login on app start: if there's a persisted firebase user, sign out immediately
+      try {
+        if (u && auth) {
+          // sign out to avoid using previous session
+          await signOut(auth);
+          setUser(null);
+          setRole(getUserRoleMock(null));
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        // ignore and continue to safe defaults
+      }
+
       setUser(u);
-      setRole(getUserRoleMock(u?.email ?? null));
+      if (u && db) {
+        try {
+          const ref = doc(db, 'users', u.uid);
+          const snap = await getDoc(ref);
+          if (snap.exists()) {
+            const data: any = snap.data();
+            setRole((data.role as any) ?? getUserRoleMock(u?.email ?? null));
+          } else {
+            setRole(getUserRoleMock(u?.email ?? null));
+          }
+        } catch (e) {
+          setRole(getUserRoleMock(u?.email ?? null));
+        }
+      } else {
+        setRole(getUserRoleMock(u?.email ?? null));
+      }
       setLoading(false);
     });
   }, []);
@@ -46,16 +78,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!auth) {
       // fallback mock login when firebase not configured
       setUser({ email: email as any } as any);
-      setRole(getUserRoleMock(email));
+      const r = getUserRoleMock(email);
+      setRole(r);
       setLoading(false);
-      return;
+      return r;
     }
     await signInWithEmailAndPassword(auth, email, password);
     const u = auth.currentUser!;
-    await ensureUserDoc(u);
+    const data = await ensureUserDoc(u);
     setUser(u);
-    setRole(getUserRoleMock(u?.email ?? null));
+    // if ensureUserDoc returned data with role, use it
+    const finalRole = (data?.role as any) ?? getUserRoleMock(u?.email ?? null);
+    setRole(finalRole);
     setLoading(false);
+    return finalRole;
   }
 
   async function logout() {

@@ -20,6 +20,7 @@ export function RegisterPage({ onRegistered, onCancel }: RegisterPageProps) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [created, setCreated] = useState(false);
+  const [profile, setProfile] = useState<'orders-analyst' | 'strategy-analyst'>('orders-analyst');
 
   async function handleRegister() {
     setErr(null);
@@ -35,7 +36,10 @@ export function RegisterPage({ onRegistered, onCancel }: RegisterPageProps) {
         }
       }
 
-      await createAccount(email, password, name);
+      // map UI profile to stored role values used in Firestore
+      const role = profile === 'strategy-analyst' ? 'gestor' : 'operador';
+
+      await createAccount(email, password, name, role as any);
       setCreated(true);
     } catch (e: any) {
       setErr(e?.message || 'Erro ao criar conta');
@@ -74,6 +78,19 @@ export function RegisterPage({ onRegistered, onCancel }: RegisterPageProps) {
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Perfil</Label>
+              <div className="flex gap-4 items-center">
+                <label className="flex items-center gap-2">
+                  <input type="radio" name="profile" checked={profile === 'orders-analyst'} onChange={() => setProfile('orders-analyst')} />
+                  <span className="text-sm">Analista de Pedidos</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="radio" name="profile" checked={profile === 'strategy-analyst'} onChange={() => setProfile('strategy-analyst')} />
+                  <span className="text-sm">Analista de Estratégia</span>
+                </label>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>

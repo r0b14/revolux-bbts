@@ -8,8 +8,12 @@ export function LoginWrapper() {
   const navigate = useNavigate();
 
   async function handleLogin(email: string, password: string) {
-    await login(email, password);
-    navigate('/dashboard');
+    const role = await login(email, password);
+    if (role === 'gestor' || role === 'admin') {
+      navigate('/strategy');
+    } else {
+      navigate('/dashboard');
+    }
   }
 
   return <LoginPage onLogin={handleLogin} onSwitchToRegister={() => navigate('/register')} />;

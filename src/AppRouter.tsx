@@ -3,16 +3,20 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 // LoginPage/RegisterPage are used via wrappers
 import { AppRoot } from './AppRoot';
 import { OrdersProvider } from './app/context/OrdersContext';
-import { OrdersListWrapper, OrderDetailsWrapper } from './components/pages/OrdersRouteWrappers';
+import { OrdersListWrapper, OrderDetailsWrapper, HomeWrapper } from './components/pages/OrdersRouteWrappers';
 import { StrategyAnalystHome } from './components/StrategyAnalystHome';
 // OrderListingPage and OrderDetailsPage are used via wrapper components
 import { ForecastsPage } from './components/pages/ForecastsPage';
 import { useAuth } from './app/context/AuthContext';
+import { useOrders } from './app/context/OrdersContext';
 import { LoginWrapper, RegisterWrapper } from './components/AuthRouteWrappers';
 import { useNavigate } from 'react-router-dom';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth() as any;
+  // diagnostic log
+  // eslint-disable-next-line no-console
+  console.info('RequireAuth: user=', user, 'loading=', loading);
   if (loading) return <div />;
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
@@ -20,6 +24,9 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 function RequireRole({ children, allowedRoles }: { children: React.ReactNode; allowedRoles: string[] }) {
   const { role, loading } = useAuth() as any;
+  // diagnostic
+  // eslint-disable-next-line no-console
+  console.info('RequireRole: role=', role, 'allowed=', allowedRoles, 'loading=', loading);
   if (loading) return <div />;
   if (!role || !allowedRoles.includes(role)) {
     // redirect to dashboard if role not allowed
@@ -30,6 +37,7 @@ function RequireRole({ children, allowedRoles }: { children: React.ReactNode; al
 
 function StrategyWrapper() {
   const { user, logout } = useAuth() as any;
+  const { orders, updateOrder } = useOrders() as any;
   const navigate = useNavigate();
 
   function handleLogout() {
@@ -37,7 +45,21 @@ function StrategyWrapper() {
     navigate('/login');
   }
 
-  return <StrategyAnalystHome onLogout={handleLogout} userEmail={user?.email ?? ''} />;
+  function handleAddHistory(_history: any) {
+    // placeholder: in-memory app doesn't persist history globally
+    return;
+  }
+
+  return (
+    <StrategyAnalystHome 
+      onLogout={handleLogout} 
+      userEmail={user?.email ?? ''}
+      orders={orders}
+      onUpdateOrder={(id: string, updates: any) => updateOrder(id, updates)}
+      orderHistory={[]}
+      onAddHistory={handleAddHistory}
+    />
+  );
 }
 
 export function AppRouter() {
@@ -58,7 +80,7 @@ export function AppRouter() {
           }
         >
           <Route index element={<div />} />
-          <Route path="dashboard" element={<OrdersListWrapper />} />
+          <Route path="dashboard" element={<HomeWrapper />} />
           <Route path="orders" element={<OrdersListWrapper />} />
           <Route path="orders/:id" element={<OrderDetailsWrapper />} />
           <Route path="forecasts" element={<ForecastsPage orders={[]} />} />
@@ -69,7 +91,9 @@ export function AppRouter() {
           element={
             <RequireAuth>
               <RequireRole allowedRoles={["admin", "gestor"]}>
+                  <OrdersProvider>
                 <StrategyWrapper />
+                  </OrdersProvider>
               </RequireRole>
             </RequireAuth>
           }

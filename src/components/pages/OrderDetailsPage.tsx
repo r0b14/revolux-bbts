@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { EditOrderDialog } from '../EditOrderDialog';
 import { DeferDialog } from '../DeferDialog';
+import { useAuth } from '../../app/context/AuthContext';
 
 interface OrderDetailsPageProps {
   order: Order;
@@ -38,21 +39,31 @@ interface OrderDetailsPageProps {
   onDefer: (orderId: string, justification: string, reminderDays?: number) => void;
 }
 
-const statusConfig = {
-  pending: { label: 'Pendente', color: 'bg-yellow-100 text-yellow-800 border-yellow-300', icon: Clock },
-  approved: { label: 'Aprovado', color: 'bg-green-100 text-green-800 border-green-300', icon: CheckCircle },
-  deferred: { label: 'Adiado', color: 'bg-gray-100 text-gray-800 border-gray-300', icon: XCircle },
-  edited: { label: 'Editado', color: 'bg-blue-100 text-blue-800 border-blue-300', icon: Edit }
+const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+  pending: { label: 'Pendente', color: 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800', icon: Clock },
+  approved: { label: 'Aprovado', color: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800', icon: CheckCircle },
+  deferred: { label: 'Adiado', color: 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600', icon: XCircle },
+  edited: { label: 'Editado', color: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800', icon: Edit },
+  'strategy-review': { label: 'Em Análise', color: 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800', icon: Clock },
+  'strategy-approved': { label: 'Aprovado', color: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800', icon: CheckCircle },
+  'strategy-approved-with-obs': { label: 'Aprovado c/ Obs', color: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800', icon: CheckCircle },
+  'strategy-rejected': { label: 'Reprovado', color: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800', icon: XCircle },
+  'purchase-request': { label: 'Solicitação de Compra', color: 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800', icon: ShoppingCart },
+  'quotation-pending': { label: 'Aguardando Cotação', color: 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800', icon: Clock },
+  'quotation-approved': { label: 'Cotação Aprovada', color: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800', icon: CheckCircle },
+  'payment-pending': { label: 'Aguardando Pagamento', color: 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800', icon: Clock },
+  'payment-done': { label: 'Pagamento Realizado', color: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800', icon: CheckCircle },
+  'delivery-pending': { label: 'Aguardando Entrega', color: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800', icon: Package },
+  'delivered': { label: 'Entregue', color: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800', icon: CheckCircle }
 };
 
 // Timeline stages
 const timelineStages = [
-  { id: 'created', label: 'Análise Pendente', icon: AlertCircle, color: '#f59e0b' },
-  { id: 'deferred', label: 'Adiado', icon: XCircle, color: '#6b7280' },
-  { id: 'awaiting', label: 'Aguardando Aprovação', icon: Clock, color: '#eab308' },
+  { id: 'analysis', label: 'Análise de Necessidade', icon: AlertCircle, color: '#f59e0b' },
+  { id: 'awaiting-tc', label: 'Aguardando Aprovação TC', icon: Clock, color: '#eab308' },
   { id: 'approved', label: 'Aprovado', icon: CheckCircle, color: '#22c55e' },
-  { id: 'rejected', label: 'Reprovado', icon: XCircle, color: '#ef4444' },
   { id: 'purchase', label: 'Processo de Compra', icon: ShoppingCart, color: '#465EFF' },
+  { id: 'delivery', label: 'Entrega', icon: Package, color: '#10b981' },
 ];
 
 export function OrderDetailsPage({ 
@@ -66,14 +77,17 @@ export function OrderDetailsPage({
   const [deferDialogOpen, setDeferDialogOpen] = useState(false);
   const [comment, setComment] = useState('');
   const [category, setCategory] = useState(order.category || '');
-  const [suppliers, setSuppliers] = useState<string[]>(
-    order.suppliers || (order.supplier ? [order.supplier] : [])
-  );
+  const suppliers = order.suppliers || (order.supplier ? [order.supplier] : []);
   const [isEditingCategory, setIsEditingCategory] = useState(false);
 
-  const status = statusConfig[order.status];
+  const status = statusConfig[order.status] || {
+    label: order.status,
+    color: 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
+    icon: AlertCircle
+  };
   const StatusIcon = status.icon;
   const totalValue = order.quantity * order.estimatedValue;
+  const { role } = useAuth() as any;
 
   // Mock comments history
   const commentsHistory = order.comments || (order.comment ? [{
@@ -85,10 +99,26 @@ export function OrderDetailsPage({
 
   // Calculate current stage in timeline
   const getCurrentStage = () => {
-    if (order.status === 'approved') return 3; // Aprovado
-    if (order.status === 'deferred') return 1; // Adiado
-    if (order.status === 'pending' || order.status === 'edited') return 2; // Aguardando aprovação
-    return 0; // Análise pendente
+    // Etapa 4: Entrega
+    if (order.status === 'delivered') return 4;
+    
+    // Etapa 3: Processo de Compra
+    if (order.status === 'purchase-request' || 
+        order.status?.includes('quotation') || 
+        order.status?.includes('payment') || 
+        order.status?.includes('delivery')) return 3;
+    
+    // Etapa 2: Aprovado
+    if (order.status === 'approved' || 
+        order.status === 'strategy-review' ||
+        order.status === 'strategy-approved' ||
+        order.status === 'strategy-approved-with-obs') return 2;
+    
+    // Etapa 1: Aguardando Aprovação TC
+    if (order.status === 'pending' || order.status === 'edited') return 1;
+    
+    // Etapa 0: Análise de Necessidade
+    return 0;
   };
 
   const currentStageIndex = getCurrentStage();
@@ -97,8 +127,8 @@ export function OrderDetailsPage({
   const history = [
     {
       id: '1',
-      action: 'Pedido criado',
-      stage: 'created',
+      action: 'Análise de necessidade iniciada',
+      stage: 'analysis',
       user: 'Sistema',
       timestamp: order.createdAt,
       details: `Pedido importado de ${order.source}`
@@ -106,26 +136,42 @@ export function OrderDetailsPage({
     ...(order.status === 'edited' ? [{
       id: '2',
       action: 'Pedido editado',
-      stage: 'awaiting',
+      stage: 'awaiting-tc',
       user: 'analista.pedidos@revolux.com',
       timestamp: new Date().toISOString(),
       details: 'Quantidade e valores ajustados'
     }] : []),
-    ...(order.status === 'deferred' ? [{
+    ...(currentStageIndex >= 1 && order.status !== 'deferred' ? [{
       id: '3',
-      action: 'Pedido adiado',
-      stage: 'deferred',
+      action: 'Enviado para aprovação TC',
+      stage: 'awaiting-tc',
       user: 'analista.pedidos@revolux.com',
       timestamp: new Date().toISOString(),
-      details: 'Aguardando revisão de orçamento'
+      details: 'Aguardando aprovação do termo de compra'
     }] : []),
-    ...(order.status === 'approved' ? [{
+    ...(currentStageIndex >= 2 ? [{
       id: '4',
       action: 'Pedido aprovado',
       stage: 'approved',
-      user: 'analista.pedidos@revolux.com',
+      user: 'analista.estrategia@revolux.com',
       timestamp: new Date().toISOString(),
-      details: 'Aprovação realizada após análise'
+      details: 'Aprovação realizada após análise estratégica'
+    }] : []),
+    ...(currentStageIndex >= 3 ? [{
+      id: '5',
+      action: 'Processo de compra iniciado',
+      stage: 'purchase',
+      user: 'analista.estrategia@revolux.com',
+      timestamp: new Date().toISOString(),
+      details: 'Solicitação de cotações aos fornecedores'
+    }] : []),
+    ...(currentStageIndex >= 4 ? [{
+      id: '6',
+      action: 'Entrega confirmada',
+      stage: 'delivery',
+      user: 'Sistema',
+      timestamp: new Date().toISOString(),
+      details: 'Produto entregue e recebido'
     }] : []),
   ];
 
@@ -168,8 +214,8 @@ export function OrderDetailsPage({
           </div>
         </div>
 
-        {/* Actions */}
-        {order.status === 'pending' && (
+        {/* Actions: only for Analista de Pedidos (operador) */}
+        {order.status === 'pending' && role === 'operador' && (
           <div className="flex gap-2 flex-wrap">
             <Button 
               variant="outline"
@@ -214,15 +260,11 @@ export function OrderDetailsPage({
             />
 
             {/* Timeline stages */}
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4 relative">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 relative">
               {timelineStages.map((stage, index) => {
                 const Icon = stage.icon;
                 const isCompleted = index <= currentStageIndex;
                 const isCurrent = index === currentStageIndex;
-                const isSkipped = (stage.id === 'deferred' && order.status !== 'deferred') ||
-                                  (stage.id === 'rejected' && order.status !== 'rejected');
-
-                if (isSkipped && index > currentStageIndex) return null;
 
                 return (
                   <div key={stage.id} className="flex flex-col items-center text-center">
@@ -230,16 +272,16 @@ export function OrderDetailsPage({
                       className={`
                         w-10 h-10 rounded-full flex items-center justify-center mb-2 z-10
                         ${isCurrent ? 'ring-4 ring-opacity-30' : ''}
-                        ${isCompleted ? 'text-white' : 'bg-gray-100 text-gray-400'}
+                        ${isCompleted ? 'text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600'}
                       `}
                       style={isCompleted ? { 
                         backgroundColor: stage.color,
-                        ringColor: stage.color 
+                        boxShadow: `0 0 0 6px ${stage.color}33`
                       } : {}}
                     >
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className={`text-xs ${isCompleted ? '' : 'text-gray-400'}`}>
+                    <span className={`text-xs ${isCompleted ? 'dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
                       {stage.label}
                     </span>
                   </div>

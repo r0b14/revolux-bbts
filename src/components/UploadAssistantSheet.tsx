@@ -8,7 +8,10 @@ import {
 } from './ui/sheet';
 import { Button } from './ui/button';
 import { Upload, FileSpreadsheet, FileText, File, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
+import { createUploadMeta, attachStoragePath, finalizeUpload } from '../app/services/firestoreUploads';
+
+const ENABLE_AZURE = import.meta.env.VITE_ENABLE_AZURE_UPLOAD === 'true';
 
 interface UploadAssistantSheetProps {
   open: boolean;
@@ -62,14 +65,55 @@ export function UploadAssistantSheet({ open, onOpenChange }: UploadAssistantShee
 
   const handleProcess = () => {
     if (!uploadedFile) return;
-    
-    // Simular processamento
-    toast.success('Processamento iniciado!', {
-      description: 'O sistema está analisando seus dados e gerará pedidos automaticamente.'
-    });
-    
-    setUploadedFile(null);
-    onOpenChange(false);
+    (async () => {
+      toast.loading('Iniciando processamento...');
+      try {
+        // 1) criar metadados no Firestore (usuario autenticado)
+        const uploadId = await createUploadMeta(uploadedFile);
+
+        // 2) se habilitado, pedir URL para Azure e enviar
+        if (ENABLE_AZURE) {
+          const resp = await fetch('http://localhost:7071/api/get-upload-url');
+          if (!resp.ok) throw new Error('Falha ao obter URL de upload');
+          const data = await resp.json();
+          const uploadUrl = data?.uploadUrl || data?.url || data?.sasUrl;
+          if (!uploadUrl) throw new Error('URL de upload inválida do servidor');
+
+          // PUT do arquivo diretamente para o storage (assume que é permitido)
+          const putResp = await fetch(uploadUrl, {
+            method: 'PUT',
+            body: uploadedFile,
+            headers: {
+              // dependendo do backend pode ser necessário content-type
+              'x-ms-blob-type': 'BlockBlob'
+            }
+          });
+          if (!putResp.ok) throw new Error('Falha ao enviar arquivo para storage');
+
+          // opcional: gravar caminho/URL no doc de upload
+          await attachStoragePath(uploadId, uploadUrl);
+
+          // confirmar processamento remoto (se houver endpoint de confirmação)
+          try {
+            await fetch(`http://localhost:7071/api/upload/${uploadId}/confirm`, { method: 'POST' });
+          } catch (e) {
+            // ignora falha de confirmação remota
+          }
+
+          await finalizeUpload(uploadId, { rows: 0, columns: 0 });
+          toast.success('Arquivo enviado e processamento iniciado!');
+        } else {
+          // Mock path: apenas finalize meta com status pending para testes locais
+          toast.success('Arquivo pronto — metadados gravados (mock)');
+        }
+      } catch (e: any) {
+        // tentamos criar meta antes — se tiver uploadId, sinaliza falha
+        toast.error('Erro no processamento: ' + (e?.message || String(e)));
+      } finally {
+        setUploadedFile(null);
+        onOpenChange(false);
+      }
+    })();
   };
 
   return (

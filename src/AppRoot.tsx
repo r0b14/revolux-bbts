@@ -5,7 +5,7 @@ import { AnalystOrdersHome } from './components/AnalystOrdersHome';
 
 export function AppRoot() {
   const { user, logout } = useAuth() as any;
-  const { orders } = useOrders();
+  const { orders, updateOrder } = useOrders();
   const navigate = useNavigate();
 
   function handleLogout() {
@@ -16,7 +16,7 @@ export function AppRoot() {
   const userEmail = user?.email ?? '';
 
   return (
-    <AnalystOrdersHome orders={orders} onLogout={handleLogout} userEmail={userEmail}>
+    <AnalystOrdersHome orders={orders} onLogout={handleLogout} userEmail={userEmail} onUpdateOrder={(id, updates) => updateOrder(id, updates)}>
       <Outlet />
     </AnalystOrdersHome>
   );

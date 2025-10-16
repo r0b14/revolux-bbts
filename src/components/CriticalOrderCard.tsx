@@ -20,25 +20,25 @@ interface CriticalOrderCardProps {
 const urgencyConfig = {
   critical: {
     label: 'Crítico',
-    color: 'border-red-500 bg-red-50',
+    color: 'border-red-500 bg-red-50 dark:bg-red-950/30 dark:border-red-800',
     badgeColor: 'bg-red-500 text-white',
-    iconColor: 'text-red-600',
+    iconColor: 'text-red-600 dark:text-red-400',
     progressColor: 'bg-red-500',
     icon: Flame
   },
   high: {
     label: 'Urgente',
-    color: 'border-orange-500 bg-orange-50',
+    color: 'border-orange-500 bg-orange-50 dark:bg-orange-950/30 dark:border-orange-800',
     badgeColor: 'bg-orange-500 text-white',
-    iconColor: 'text-orange-600',
+    iconColor: 'text-orange-600 dark:text-orange-400',
     progressColor: 'bg-orange-500',
     icon: AlertCircle
   },
   medium: {
     label: 'Atenção',
-    color: 'border-yellow-500 bg-yellow-50',
+    color: 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30 dark:border-yellow-800',
     badgeColor: 'bg-yellow-500 text-white',
-    iconColor: 'text-yellow-600',
+    iconColor: 'text-yellow-600 dark:text-yellow-400',
     progressColor: 'bg-yellow-500',
     icon: Clock
   }
@@ -75,21 +75,21 @@ export function CriticalOrderCard({ order, onClick, urgencyLevel }: CriticalOrde
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">{order.id}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{order.id}</span>
                   <Badge className={config.badgeColor}>
                     {config.label}
                   </Badge>
                 </div>
-                <p className="text-sm mt-0.5 text-gray-500 font-mono">{order.sku}</p>
+                <p className="text-sm mt-0.5 text-gray-500 dark:text-gray-400 font-mono">{order.sku}</p>
               </div>
             </div>
           </div>
 
           {/* Item Name */}
           <div>
-            <h4 className="line-clamp-2">{order.item}</h4>
+            <h4 className="line-clamp-2 dark:text-white">{order.item}</h4>
             {order.supplier && (
-              <p className="text-xs text-gray-500 mt-1">{order.supplier}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{order.supplier}</p>
             )}
           </div>
 
@@ -98,22 +98,22 @@ export function CriticalOrderCard({ order, onClick, urgencyLevel }: CriticalOrde
             <div className="space-y-1">
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  <span className="text-gray-600">
+                  <Calendar className="w-3 h-3 dark:text-gray-400" />
+                  <span className="text-gray-600 dark:text-gray-300">
                     {daysUntilDeadline <= 0 
                       ? 'Prazo vencido!' 
                       : `${daysUntilDeadline} ${daysUntilDeadline === 1 ? 'dia' : 'dias'} restantes`
                     }
                   </span>
                 </div>
-                <span className="text-gray-500">
+                <span className="text-gray-500 dark:text-gray-400">
                   {new Date(order.deadline!).toLocaleDateString('pt-BR', { 
                     day: '2-digit', 
                     month: 'short' 
                   })}
                 </span>
               </div>
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div 
                   className={`h-full ${config.progressColor} transition-all`}
                   style={{ width: `${urgencyPercentage}%` }}
@@ -123,17 +123,17 @@ export function CriticalOrderCard({ order, onClick, urgencyLevel }: CriticalOrde
           )}
 
           {/* Details Grid */}
-          <div className="grid grid-cols-2 gap-3 pt-2 border-t">
+          <div className="grid grid-cols-2 gap-3 pt-2 border-t dark:border-gray-700">
             <div>
-              <p className="text-xs text-gray-500">Quantidade</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Quantidade</p>
               <div className="flex items-center gap-1 mt-0.5">
-                <Package className="w-3 h-3 text-gray-400" />
-                <p className="text-sm">{order.quantity.toLocaleString('pt-BR')}</p>
+                <Package className="w-3 h-3 text-gray-400 dark:text-gray-500" />
+                <p className="text-sm dark:text-gray-200">{order.quantity.toLocaleString('pt-BR')}</p>
               </div>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Valor Total</p>
-              <p className="text-sm mt-0.5">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Valor Total</p>
+              <p className="text-sm dark:text-gray-200 mt-0.5">
                 {new Intl.NumberFormat('pt-BR', { 
                   style: 'currency', 
                   currency: 'BRL',

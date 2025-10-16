@@ -51,8 +51,8 @@ export function OrderListingPage({ orders, onOrderClick }: OrderListingPageProps
   return (
     <div className="space-y-6">
       <div>
-        <h2>Listagem de pedidos</h2>
-        <p className="text-gray-500 mt-1">
+        <h2 className="dark:text-white">Listagem de pedidos</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           Visualize e gerencie todos os pedidos do sistema
         </p>
       </div>
@@ -63,13 +63,13 @@ export function OrderListingPage({ orders, onOrderClick }: OrderListingPageProps
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm text-gray-500">Total de Pedidos</CardTitle>
-              <Package className="w-5 h-5 text-gray-400" />
+              <CardTitle className="text-sm text-gray-500 dark:text-gray-400 font-normal">Total de Pedidos</CardTitle>
+              <Package className="w-5 h-5 text-gray-400 dark:text-gray-500" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl mb-1">{stats.total}</div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+            <div className="text-3xl dark:text-white mb-1">{stats.total}</div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3">
               <div 
                 className="h-2 rounded-full transition-all"
                 style={{ 
@@ -85,13 +85,13 @@ export function OrderListingPage({ orders, onOrderClick }: OrderListingPageProps
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm text-gray-500">Precisam de Análise</CardTitle>
+              <CardTitle className="text-sm text-gray-500 dark:text-gray-400 font-normal">Precisam de Análise</CardTitle>
               <Clock className="w-5 h-5 text-orange-500" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl mb-1">{stats.needAnalysis}</div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+            <div className="text-3xl dark:text-white mb-1">{stats.needAnalysis}</div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3">
               <div 
                 className="bg-orange-500 h-2 rounded-full transition-all"
                 style={{ 
@@ -99,7 +99,7 @@ export function OrderListingPage({ orders, onOrderClick }: OrderListingPageProps
                 }}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               {stats.total > 0 ? Math.round((stats.needAnalysis / stats.total) * 100) : 0}% do total
             </p>
           </CardContent>
@@ -109,13 +109,13 @@ export function OrderListingPage({ orders, onOrderClick }: OrderListingPageProps
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm text-gray-500">Aguardam Aprovação</CardTitle>
+              <CardTitle className="text-sm text-gray-500 dark:text-gray-400 font-normal">Aguardam Aprovação</CardTitle>
               <AlertCircle className="w-5 h-5 text-yellow-600" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl mb-1">{stats.awaitingApproval}</div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+            <div className="text-3xl dark:text-white mb-1">{stats.awaitingApproval}</div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3">
               <div 
                 className="bg-yellow-500 h-2 rounded-full transition-all"
                 style={{ 
@@ -123,7 +123,7 @@ export function OrderListingPage({ orders, onOrderClick }: OrderListingPageProps
                 }}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               {stats.total > 0 ? Math.round((stats.awaitingApproval / stats.total) * 100) : 0}% do total
             </p>
           </CardContent>
@@ -133,13 +133,13 @@ export function OrderListingPage({ orders, onOrderClick }: OrderListingPageProps
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm text-gray-500">Já Aprovados</CardTitle>
+              <CardTitle className="text-sm text-gray-500 dark:text-gray-400 font-normal">Já Aprovados</CardTitle>
               <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl mb-1">{stats.approved}</div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+            <div className="text-3xl dark:text-white mb-1">{stats.approved}</div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-3">
               <div 
                 className="bg-green-500 h-2 rounded-full transition-all"
                 style={{ 
@@ -147,7 +147,7 @@ export function OrderListingPage({ orders, onOrderClick }: OrderListingPageProps
                 }}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               {stats.total > 0 ? Math.round((stats.approved / stats.total) * 100) : 0}% do total
             </p>
           </CardContent>
@@ -155,7 +155,7 @@ export function OrderListingPage({ orders, onOrderClick }: OrderListingPageProps
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg p-4 border">
+      <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border dark:border-gray-800">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -168,7 +168,7 @@ export function OrderListingPage({ orders, onOrderClick }: OrderListingPageProps
           </div>
           
           <div className="flex flex-wrap gap-2">
-            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+            <Select value={statusFilter} onValueChange={(value: string) => setStatusFilter(value as any)}>
               <SelectTrigger className="w-[160px]">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Status" />

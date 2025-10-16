@@ -1,19 +1,20 @@
 import { useState } from 'react';
-
 import { Order } from '../../types';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Button } from '../ui/button';
 import { Bell, AlertCircle, Clock, TrendingUp, Lightbulb } from 'lucide-react';
+// navigation removed from this component (registration quick access removed)
 import { UploadAssistantSheet } from '../UploadAssistantSheet';
 import { AITaskAgent } from '../AITaskAgent';
 
 interface HomePageProps {
   orders: Order[];
   onOrderClick: (order: Order) => void;
+  onNavigateToOrders?: () => void;
 }
 
-export function HomePage({ orders, onOrderClick }: HomePageProps) {
+export function HomePage({ orders, onOrderClick, onNavigateToOrders }: HomePageProps) {
   const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
   
   const pendingOrders = orders.filter(o => o.status === 'pending');
@@ -79,15 +80,23 @@ export function HomePage({ orders, onOrderClick }: HomePageProps) {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h2>Suas atividades de hoje</h2>
-          <p className="text-gray-500 mt-1">
+          <h2 className="dark:text-white">Suas atividades de hoje</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Tarefas priorizadas e organizadas para você
           </p>
         </div>
-        <Button onClick={() => setUploadSheetOpen(true)} style={{ backgroundColor: '#465EFF' }}>
-          <Lightbulb className="w-4 h-4 mr-2" />
-          Me ajude a pensar
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setUploadSheetOpen(true)} style={{ backgroundColor: '#465EFF' }}>
+            <Lightbulb className="w-4 h-4 mr-2" />
+            Me ajude a pensar
+          </Button>
+          {onNavigateToOrders && (
+            <Button variant="ghost" onClick={onNavigateToOrders}>
+              Ver listagem
+            </Button>
+          )}
+          {/* Registration quick access removed in production UI */}
+        </div>
       </div>
 
       {/* AI Task Agent */}
@@ -95,10 +104,10 @@ export function HomePage({ orders, onOrderClick }: HomePageProps) {
 
       {/* Notificações e Alertas */}
       {urgentOrders.length > 0 && (
-        <Alert className="border-orange-200 bg-orange-50">
+        <Alert className="border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/30">
           <AlertCircle className="h-4 w-4 text-orange-600" />
-          <AlertTitle className="text-orange-900">Pedidos Urgentes</AlertTitle>
-          <AlertDescription className="text-orange-800">
+          <AlertTitle className="text-orange-900 dark:text-orange-400">Pedidos Urgentes</AlertTitle>
+          <AlertDescription className="text-orange-800 dark:text-orange-300">
             Você tem {urgentOrders.length} pedido(s) com prazo de entrega em até 7 dias que precisam de análise.
           </AlertDescription>
         </Alert>
@@ -114,8 +123,8 @@ export function HomePage({ orders, onOrderClick }: HomePageProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl">{pendingOrders.length}</div>
-            <p className="text-xs text-gray-500 mt-1">Aguardando sua Analise</p>
+            <div className="text-3xl dark:text-white">{pendingOrders.length}</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Aguardando sua Analise</p>
           </CardContent>
         </Card>
 
@@ -127,8 +136,8 @@ export function HomePage({ orders, onOrderClick }: HomePageProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl">{urgentOrders.length}</div>
-            <p className="text-xs text-gray-500 mt-1">Vencimento em até 7 dias</p>
+            <div className="text-3xl dark:text-white">{urgentOrders.length}</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Vencimento em até 7 dias</p>
           </CardContent>
         </Card>
 
@@ -140,14 +149,14 @@ export function HomePage({ orders, onOrderClick }: HomePageProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl">
+            <div className="text-3xl dark:text-white">
               {new Intl.NumberFormat('pt-BR', { 
                 notation: 'compact',
                 style: 'currency', 
                 currency: 'BRL' 
               }).format(pendingOrders.reduce((sum, o) => sum + o.estimatedValue, 0))}
             </div>
-            <p className="text-xs text-gray-500 mt-1">Em requisições pendentes</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Em requisições pendentes</p>
           </CardContent>
         </Card>
       </div>
@@ -155,46 +164,46 @@ export function HomePage({ orders, onOrderClick }: HomePageProps) {
       {/* Atividades Recentes */}
       <div>
         <div className="mb-4">
-          <h3>Atividades Recentes</h3>
-          <p className="text-sm text-gray-500 mt-1">
+          <h3 className="dark:text-white">Atividades Recentes</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Últimas ações realizadas no sistema
           </p>
         </div>
         <Card>
           <CardContent className="p-0">
-            <div className="divide-y">
+            <div className="divide-y dark:divide-gray-800">
               {recentOrders.map((order) => (
                 <div 
                   key={order.id}
-                  className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
                   onClick={() => onOrderClick(order)}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm">{order.id}</span>
+                        <span className="text-sm dark:text-gray-200">{order.id}</span>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          order.status === 'approved' ? 'bg-green-100 text-green-800' :
-                          order.status === 'deferred' ? 'bg-gray-100 text-gray-800' :
-                          'bg-blue-100 text-blue-800'
+                          order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                          order.status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                          order.status === 'deferred' ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' :
+                          'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
                         }`}>
                           {order.status === 'pending' ? 'Pendente' :
                            order.status === 'approved' ? 'Aprovado' :
                            order.status === 'deferred' ? 'Adiado' : 'Editado'}
                         </span>
                       </div>
-                      <p className="text-sm">{order.item}</p>
+                      <p className="text-sm dark:text-gray-300">{order.item}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="text-xs text-gray-500">{order.source}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{order.source}</p>
                         {order.comment && (
-                          <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">
+                          <span className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-2 py-0.5 rounded">
                             Comentário pendente
                           </span>
                         )}
                       </div>
                     </div>
-                    <div className="text-right text-sm text-gray-500">
+                    <div className="text-right text-sm text-gray-500 dark:text-gray-400">
                       {new Date(order.createdAt).toLocaleDateString('pt-BR', {
                         day: '2-digit',
                         month: 'short'

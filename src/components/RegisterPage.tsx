@@ -39,8 +39,16 @@ export function RegisterPage({ onRegistered, onCancel }: RegisterPageProps) {
       // map UI profile to stored role values used in Firestore
       const role = profile === 'strategy-analyst' ? 'gestor' : 'operador';
 
-      await createAccount(email, password, name, role as any);
-      setCreated(true);
+      if (!auth) {
+        // Firebase não configurado: criar conta em modo mock (não persiste)
+        // marcamos como criada para seguir fluxo de onboarding localmente
+        // (em ambiente real, user deve configurar Firebase e usar createAccount)
+        console.info('Firebase não configurado: criando conta em modo mock', { email, role });
+        setCreated(true);
+      } else {
+        await createAccount(email, password, name, role as any);
+        setCreated(true);
+      }
     } catch (e: any) {
       setErr(e?.message || 'Erro ao criar conta');
     } finally {

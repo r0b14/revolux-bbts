@@ -83,15 +83,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
       return r;
     }
-    await signInWithEmailAndPassword(auth, email, password);
-    const u = auth.currentUser!;
-    const data = await ensureUserDoc(u);
-    setUser(u);
-    // if ensureUserDoc returned data with role, use it
-    const finalRole = (data?.role as any) ?? getUserRoleMock(u?.email ?? null);
-    setRole(finalRole);
-    setLoading(false);
-    return finalRole;
+    try {
+      // explicit logs to help debug runtime redirect issues
+      // eslint-disable-next-line no-console
+      console.info('AuthContext: attempting signInWithEmailAndPassword for', email);
+      await signInWithEmailAndPassword(auth, email, password);
+      const u = auth.currentUser!;
+      // ensure user doc exists and read role
+      const data = await ensureUserDoc(u);
+      setUser(u);
+      const finalRole = (data?.role as any) ?? getUserRoleMock(u?.email ?? null);
+      setRole(finalRole);
+      // eslint-disable-next-line no-console
+      console.info('AuthContext: login successful, role=', finalRole, 'uid=', u?.uid);
+      setLoading(false);
+      return finalRole;
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('AuthContext: login error', err);
+      setLoading(false);
+      return null;
+    }
   }
 
   async function logout() {

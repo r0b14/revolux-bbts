@@ -23,6 +23,8 @@ export function HomeWrapper() {
     navigate(`/orders/${order.id}`);
   }
 
+  // Do not pass onNavigateToOrders when rendering as the dashboard for the
+  // Sistema de Aquisições (operador). This hides the quick "Ver listagem" button.
   return <HomePage orders={orders} onOrderClick={handleOrderClick} />;
 }
 

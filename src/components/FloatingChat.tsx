@@ -2,23 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
-import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
-import { 
-  MessageCircle, 
-  X, 
-  Send, 
-  Maximize2, 
-  Bot, 
-  User as UserIcon,
-  TrendingUp,
-  AlertCircle,
-  CheckCircle,
-  DollarSign,
-  Package,
-  BarChart3,
-  Sparkles
-} from 'lucide-react';
+import { MessageCircle, X, Send, Maximize2, Bot, User as UserIcon, BarChart3, Sparkles } from 'lucide-react';
 import { Order } from '../types';
 
 interface Message {
@@ -33,9 +18,10 @@ interface Message {
 interface FloatingChatProps {
   orders: Order[];
   userName: string;
+  userProfile?: 'orders-analyst' | 'strategy-analyst';
 }
 
-export function FloatingChat({ orders, userName }: FloatingChatProps) {
+export function FloatingChat({ orders, userName, userProfile = 'orders-analyst' }: FloatingChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -52,12 +38,19 @@ export function FloatingChat({ orders, userName }: FloatingChatProps) {
   }, [messages, isTyping]);
 
   // Suggestions for starting the conversation
-  const startSuggestions = [
-    "Qual o status geral dos pedidos?",
-    "Quais pedidos precisam de atenção urgente?",
-    "Mostre um resumo dos valores por centro de custo",
-    "Quantos pedidos estão pendentes?"
-  ];
+  const startSuggestions = userProfile === 'strategy-analyst' 
+    ? [
+        "Liste pra mim os fornecedores que mais atrasam entrega",
+        "Liste para mim com que fornecedor ainda temos licitação em aberto",
+        "Quais pedidos precisam de análise estratégica?",
+        "Mostre pedidos com valores acima de R$ 50.000"
+      ]
+    : [
+        "Qual o status geral dos pedidos?",
+        "Quais pedidos precisam de atenção urgente?",
+        "Mostre um resumo dos valores por centro de custo",
+        "Quantos pedidos estão pendentes?"
+      ];
 
   // Generate AI response based on user query
   const generateAIResponse = (query: string): Message => {
@@ -360,7 +353,7 @@ export function FloatingChat({ orders, userName }: FloatingChatProps) {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl flex flex-col z-50 overflow-hidden">
+        <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl flex flex-col z-50 overflow-hidden bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
           {/* Header */}
           <div className="p-4 border-b flex items-center justify-between" style={{ backgroundColor: '#465EFF' }}>
             <div className="flex items-center gap-2 text-white">
@@ -403,8 +396,8 @@ export function FloatingChat({ orders, userName }: FloatingChatProps) {
                 <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: '#C2D6FF' }}>
                   <BarChart3 className="w-8 h-8" style={{ color: '#465EFF' }} />
                 </div>
-                <h3 className="text-lg mb-2">Consulta Inteligente de Dados</h3>
-                <p className="text-sm text-gray-600 mb-6">
+                <h3 className="text-lg mb-2 dark:text-white">Consulta Inteligente de Dados</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
                   Analise seus pedidos e obtenha insights para tomar melhores decisões
                 </p>
                 <Button 
@@ -416,10 +409,10 @@ export function FloatingChat({ orders, userName }: FloatingChatProps) {
                   Iniciar Consulta
                 </Button>
                 <div className="w-full mt-4 text-left">
-                  <p className="text-xs text-gray-500 mb-2">Exemplos de perguntas:</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Exemplos de perguntas:</p>
                   <div className="space-y-2">
                     {startSuggestions.slice(0, 3).map((suggestion, index) => (
-                      <div key={index} className="text-xs bg-gray-50 p-2 rounded">
+                      <div key={index} className="text-xs bg-gray-50 dark:bg-gray-800 dark:text-gray-300 p-2 rounded">
                         • {suggestion}
                       </div>
                     ))}
@@ -443,7 +436,7 @@ export function FloatingChat({ orders, userName }: FloatingChatProps) {
                           <div className={`rounded-lg p-3 ${
                             message.type === 'user' 
                               ? 'bg-[#465EFF] text-white' 
-                              : 'bg-gray-100 text-gray-900'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                           }`}>
                             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                           </div>
@@ -457,12 +450,12 @@ export function FloatingChat({ orders, userName }: FloatingChatProps) {
                         {/* Suggestions */}
                         {message.suggestions && message.suggestions.length > 0 && (
                           <div className="ml-8 mt-2 space-y-1">
-                            <p className="text-xs text-gray-500 mb-1">Sugestões:</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Sugestões:</p>
                             {message.suggestions.map((suggestion, index) => (
                               <button
                                 key={index}
                                 onClick={() => handleSuggestionClick(suggestion)}
-                                className="block w-full text-left text-xs bg-white hover:bg-gray-50 border border-gray-200 rounded px-2 py-1.5 transition-colors"
+                                className="block w-full text-left text-xs bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 transition-colors dark:text-gray-200"
                               >
                                 {suggestion}
                               </button>
@@ -480,11 +473,11 @@ export function FloatingChat({ orders, userName }: FloatingChatProps) {
                         <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#C2D6FF' }}>
                           <Bot className="w-4 h-4" style={{ color: '#465EFF' }} />
                         </div>
-                        <div className="bg-gray-100 rounded-lg p-3">
+                        <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
                           <div className="flex gap-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                            <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                           </div>
                         </div>
                       </div>

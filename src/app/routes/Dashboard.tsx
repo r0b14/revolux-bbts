@@ -1,5 +1,5 @@
-import { Protected } from "../components/Protected";
-import Navbar from "../components/Navbar";
+import { Protected } from "../../components/Protected";
+import Navbar from "../../components/Navbar";
 import { Role } from "../services/roles";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 

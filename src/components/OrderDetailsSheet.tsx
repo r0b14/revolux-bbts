@@ -15,7 +15,6 @@ import {
   Edit, 
   Clock, 
   Package, 
-  DollarSign, 
   Building2, 
   Calendar,
   User,
@@ -33,11 +32,22 @@ interface OrderDetailsSheetProps {
   onDefer: (orderId: string, justification: string, reminderDays?: number) => void;
 }
 
-const statusConfig = {
-  pending: { label: 'Pendente', className: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
-  approved: { label: 'Aprovado', className: 'bg-green-100 text-green-800 border-green-300' },
-  deferred: { label: 'Adiado', className: 'bg-gray-100 text-gray-800 border-gray-300' },
-  edited: { label: 'Editado', className: 'bg-blue-100 text-blue-800 border-blue-300' }
+const statusConfig: Record<string, { label: string; className: string }> = {
+  pending: { label: 'Pendente', className: 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800' },
+  approved: { label: 'Aprovado', className: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' },
+  deferred: { label: 'Adiado', className: 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600' },
+  edited: { label: 'Editado', className: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' },
+  'strategy-review': { label: 'Em Análise', className: 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800' },
+  'strategy-approved': { label: 'Aprovado', className: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' },
+  'strategy-approved-with-obs': { label: 'Aprovado c/ Obs', className: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' },
+  'strategy-rejected': { label: 'Reprovado', className: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' },
+  'purchase-request': { label: 'Solicitação de Compra', className: 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800' },
+  'quotation-pending': { label: 'Aguardando Cotação', className: 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800' },
+  'quotation-approved': { label: 'Cotação Aprovada', className: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' },
+  'payment-pending': { label: 'Aguardando Pagamento', className: 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800' },
+  'payment-done': { label: 'Pagamento Realizado', className: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' },
+  'delivery-pending': { label: 'Aguardando Entrega', className: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' },
+  'delivered': { label: 'Entregue', className: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' }
 };
 
 export function OrderDetailsSheet({
@@ -53,7 +63,10 @@ export function OrderDetailsSheet({
 
   if (!order) return null;
 
-  const status = statusConfig[order.status];
+  const status = statusConfig[order.status] || {
+    label: order.status,
+    className: 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
+  };
 
   const handleApprove = () => {
     onApprove(order.id);
@@ -162,7 +175,7 @@ export function OrderDetailsSheet({
                 Rastreamento
               </h3>
               <div className="space-y-3">
-                <div className="flex items-start gap-3 px-[32px] px-[24px] py-[0px]">
+                <div className="flex items-start gap-3 px-[24px] py-[0px]">
                   <Database className="w-4 h-4 text-gray-400 mt-1" />
                   <div className="flex-1">
                     <p className="text-xs text-gray-500">Fonte de Dados</p>

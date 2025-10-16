@@ -3,32 +3,19 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Package, Lock } from 'lucide-react';
+import { Lock, Bot } from 'lucide-react';
 
 interface LoginPageProps {
-  onLogin: (email: string, password: string) => Promise<void> | void;
-  onSwitchToRegister?: () => void;
-  infoMessage?: string | null;
+  onLogin: (email: string, password: string) => void;
 }
 
-export function LoginPage({ onLogin, onSwitchToRegister, infoMessage }: LoginPageProps) {
+export function LoginPage({ onLogin }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [err, setErr] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setErr(null);
-    setLoading(true);
-    try {
-      await onLogin(email, password);
-    } catch (error: any) {
-      const code = error?.code ? `${error.code} — ` : '';
-      setErr(code + (error?.message || 'Erro ao autenticar'));
-    } finally {
-      setLoading(false);
-    }
+    onLogin(email, password);
   };
 
   return (
@@ -37,7 +24,7 @@ export function LoginPage({ onLogin, onSwitchToRegister, infoMessage }: LoginPag
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#465EFF' }}>
-              <Package className="w-10 h-10 text-white" />
+              <Bot className="w-10 h-10" style={{ color: '#FCFC30' }} />
             </div>
           </div>
           <div>
@@ -71,13 +58,11 @@ export function LoginPage({ onLogin, onSwitchToRegister, infoMessage }: LoginPag
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full">
               <Lock className="w-4 h-4 mr-2" />
-              {loading ? 'Entrando...' : 'Entrar no sistema'}
+              Entrar no sistema
             </Button>
           </form>
-          {err && <div className="mt-3 text-sm text-red-600">{err}</div>}
-          {infoMessage && <div className="mt-3 text-sm text-green-700">{infoMessage}</div>}
           
           <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-900 mb-2">Usuários de demonstração:</p>
@@ -87,17 +72,7 @@ export function LoginPage({ onLogin, onSwitchToRegister, infoMessage }: LoginPag
             </div>
           </div>
         </CardContent>
-          <div className="px-6 pb-6 text-center">
-            <span className="text-sm text-slate-600 mr-2">Ainda não tem conta?</span>
-            <button
-              type="button"
-              className="text-sky-600 underline text-sm hover:text-sky-800 hover:underline-offset-2 transition-transform transform hover:scale-105 cursor-pointer"
-              onClick={() => onSwitchToRegister?.()}
-              aria-label="Cadastre-se"
-            >
-              Cadastre-se
-            </button>
-          </div>
+          {/* Registration link removed from login screen in production build */}
       </Card>
     </div>
   );

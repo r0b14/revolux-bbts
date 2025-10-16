@@ -1,5 +1,5 @@
-import { Protected } from "../components/Protected";
-import Navbar from "../components/Navbar";
+import { Protected } from "../../components/Protected";
+import Navbar from "../../components/Navbar";
 
 export default function Relatorios() {
   return (

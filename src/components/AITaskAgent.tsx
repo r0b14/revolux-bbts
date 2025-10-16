@@ -38,16 +38,16 @@ const typeIcon = {
 
 export function AITaskAgent({ tasks }: AITaskAgentProps) {
   return (
-    <Card className="border-[#C2D6FF] bg-gradient-to-br from-[#C2D6FF]/30 to-white">
+    <Card className="border-[#C2D6FF] bg-[#F5F8FF] dark:bg-gray-800">
       <CardHeader>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#465EFF' }}>
-            <Sparkles className="w-5 h-5 text-white" />
+            <Sparkles className="w-5 h-5" style={{ color: '#FCFC30' }} />
           </div>
           <div className="flex-1">
             <CardTitle className="flex items-center gap-2">
               Assistente Inteligente
-              <span className="text-xs text-white px-2 py-0.5 rounded-full" style={{ backgroundColor: '#465EFF' }}>IA</span>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#465EFF', color: '#FCFC30' }}>IA</span>
             </CardTitle>
             <CardDescription>
               Tarefas prioritárias identificadas para você hoje
